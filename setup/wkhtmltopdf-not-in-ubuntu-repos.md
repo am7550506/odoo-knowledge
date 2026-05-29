@@ -1,0 +1,66 @@
+# wkhtmltopdf Not Available in Ubuntu 24.04+ Repos
+
+| Field         | Value                                      |
+|---------------|--------------------------------------------|
+| Category      | setup                                      |
+| Odoo Versions | All (15, 16, 17, 18, 19)                   |
+| Severity      | 🔴 Critical                                |
+| Last Verified | 2026-05-20                                 |
+| Author        | ENG/Mohamed Saber                          |
+
+**Tags:** `wkhtmltopdf`, `pdf`, `reports`, `ubuntu`, `apt`, `deb`
+
+---
+
+## Problem
+
+`wkhtmltopdf` is required by Odoo for PDF report generation. Starting from Ubuntu 24.04 (Noble) and later (25.10 Resolute, 26.04), it is **NOT available** in the official apt repositories.
+
+```
+Package wkhtmltopdf is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+Error: Package 'wkhtmltopdf' has no installation candidate
+```
+
+## Root Cause
+
+`wkhtmltopdf` was removed from the official Ubuntu repositories starting with Noble (24.04). The wkhtmltopdf project provides its own `.deb` packages via GitHub releases.
+
+## Solution ✅
+
+Download and install the `.deb` package from the official GitHub releases:
+
+```bash
+# Download (Jammy build works on all newer Ubuntu versions)
+wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_amd64.deb -O /tmp/wkhtmltox.deb
+
+# Install
+sudo dpkg -i /tmp/wkhtmltox.deb
+
+# Fix any missing dependencies
+sudo apt install -f -y
+
+# Cleanup
+rm /tmp/wkhtmltox.deb
+```
+
+## ⚠️ Pitfalls
+
+- **Use the `jammy` (22.04) build** — it works on Noble (24.04), Resolute (25.10), and newer. Don't look for version-specific builds.
+- **This installs BOTH `wkhtmltopdf` and `wkhtmltoimage`** — the package is called `wkhtmltox` (with an X).
+- **It will auto-install `xfonts-75dpi`** as a dependency — this is normal and needed for proper font rendering.
+- **Don't install `wkhtmltopdf` via pip or snap** — Odoo specifically needs the Qt-patched version from this GitHub release.
+
+## Verification
+
+```bash
+wkhtmltopdf --version
+# Expected: wkhtmltopdf 0.12.6.1 (with patched qt)
+```
+
+## References
+
+- Official releases: https://github.com/wkhtmltopdf/packaging/releases
+- Odoo docs on wkhtmltopdf: https://www.odoo.com/documentation/19.0/administration/install/install.html
