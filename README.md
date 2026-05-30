@@ -59,6 +59,8 @@
 | 9 | [bypass-record-rules-duplicate-validation.md](orm/bypass-record-rules-duplicate-validation.md) | 🔴 Critical | All | `orm`, `security`, `validation`, `duplicates`, `sudo` | Securely bypassing record rules for duplicate checks via sudo().search_read() without N+1 query bottlenecks |
 | 10 | [odoo-19-res-groups-category-id-deprecation.md](orm/odoo-19-res-groups-category-id-deprecation.md) | 🔴 Critical | 19 | `orm`, `security`, `groups`, `res.groups`, `category_id` | Resolves ValueError: Invalid field 'category_id' when creating custom security groups in Odoo 19 |
 | 11 | [pos-advanced-employee-ids-forced-readd.md](orm/pos-advanced-employee-ids-forced-readd.md) | 🟡 Medium | 18, 19 | `pos`, `pos_hr`, `advanced_employee_ids`, `many2many`, `write-override`, `sql` | POS administrators forcefully re-added to advanced_employee_ids on every save, bypassed via SQL on M2M join table |
+| 12 | [avoid-translation-in-field-definitions.md](orm/avoid-translation-in-field-definitions.md) | 🔴 Critical | All | `translation`, `i18n`, `fields`, `_()`, `class-body`, `bug` | Do NOT use `_()` inside field `string=`/`help=` definitions — evaluated at import time, translations silently ignored |
+| 13 | [write-override-atomicity-pattern.md](orm/write-override-atomicity-pattern.md) | 🔴 Critical | All | `write`, `override`, `atomicity`, `state-machine`, `transaction` | State changes on related records must happen AFTER `super().write()` to guarantee atomicity |
 ### Views
 
 | # | File | Severity | Versions | Tags | Description |
@@ -83,7 +85,9 @@
 
 ### Performance
 
-_No entries yet._
+| # | File | Severity | Versions | Tags | Description |
+|---|------|----------|----------|------|--------------|
+| 1 | [n-plus-one-queries-computed-fields.md](performance/n-plus-one-queries-computed-fields.md) | 🔴 Critical | All | `performance`, `N+1`, `computed-fields`, `read_group`, `search` | Using `search()` inside computed field loops causes N+1 SQL queries — use `read_group()` instead |
 
 ### Deployment
 
@@ -127,7 +131,7 @@ odoo-knowledge/
 
 ### Stats
 
-- **Total Entries:** 25
+- **Total Entries:** 28
 - **Last Updated:** 2026-05-30
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
