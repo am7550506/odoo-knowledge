@@ -42,6 +42,7 @@
 | 9 | [missing-rtlcss-css-error.md](setup/missing-rtlcss-css-error.md) | 🔴 Critical | All | `rtlcss`, `css`, `arabic`, `ui`, `setup`, `nodejs` | Missing rtlcss global npm package causes Arabic UI layout to break with "A css error occured" |
 | 10 | [odoo-setup-automator-risks.md](setup/odoo-setup-automator-risks.md) | 🔴 Critical | All | `automation`, `setup`, `risks` | Pre-mortem risk analysis for the internal Odoo.sh Setup Automator GUI tool (database wipes, SSH hangs, disk space) |
 | 11 | [postgresql-port-conflict-and-db-version-mismatch.md](setup/postgresql-port-conflict-and-db-version-mismatch.md) | 🔴 Critical | 17, 18, 19 | `postgresql`, `port-conflict`, `startup`, `database`, `version-mismatch`, `short_time_format`, `brew`, `macos` | PostgreSQL port 5432 conflict between multiple installed versions on macOS, and DB version mismatch causing missing column errors on startup |
+| 12 | [csrf-session-conflict-multi-instance.md](setup/csrf-session-conflict-multi-instance.md) | 🔴 Critical | All | `csrf`, `session`, `multi-instance`, `localhost`, `cookie`, `bad-request`, `400` | CSRF token / session conflict when running multiple Odoo instances simultaneously on the same machine |
 
 ### ORM
 
@@ -114,7 +115,7 @@ odoo-knowledge/
 ├── README.md              ← You are here (Index)
 ├── CONTRIBUTING.md         ← How to add/update entries
 ├── TEMPLATE.md             ← Template for new entries
-├── setup/                  ← 11 entries
+├── setup/                  ← 12 entries
 ├── orm/                    ← 4 entries
 ├── views/                  ← 4 entries
 ├── security/               ← 2 entries
@@ -126,7 +127,7 @@ odoo-knowledge/
 
 ### Stats
 
-- **Total Entries:** 24
+- **Total Entries:** 25
 - **Last Updated:** 2026-05-30
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
