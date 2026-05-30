@@ -72,6 +72,7 @@
 | 5 | [separate-invoice-line-description-odoo18.md](views/separate-invoice-line-description-odoo18.md) | 🟡 Medium | 18, 19 | `views`, `invoice`, `widget` | Revert merged invoice line description to show it as separate column next to product |
 | 6 | [qweb-report-display-type-odoo17-18.md](views/qweb-report-display-type-odoo17-18.md) | 🔴 Critical | 17, 18, 19 | `qweb`, `report`, `display_type` | Fix for empty invoice lines in custom prints after migrating to Odoo 17 or 18 due to display_type changes |
 | 7 | [prevent-manual-editing-one2many-modal.md](views/prevent-manual-editing-one2many-modal.md) | 🟡 Medium | All | `views`, `one2many`, `readonly`, `ui`, `modal` | Prevent users from manually editing records via the default One2many popup modal by applying readonly to the field |
+| 8 | [xml-load-order-manifest.md](views/xml-load-order-manifest.md) | 🔴 Critical | All | `manifest`, `xml`, `load order`, `parent menu`, `external id` | Manifest XML file load order issues causing External ID not found during installation/upgrade |
 
 
 
@@ -131,7 +132,7 @@ odoo-knowledge/
 
 ### Stats
 
-- **Total Entries:** 28
+- **Total Entries:** 29
 - **Last Updated:** 2026-05-30
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
