@@ -75,6 +75,7 @@
 | 7 | [prevent-manual-editing-one2many-modal.md](views/prevent-manual-editing-one2many-modal.md) | 🟡 Medium | All | `views`, `one2many`, `readonly`, `ui`, `modal` | Prevent users from manually editing records via the default One2many popup modal by applying readonly to the field |
 | 8 | [xml-load-order-manifest.md](views/xml-load-order-manifest.md) | 🔴 Critical | All | `manifest`, `xml`, `load order`, `parent menu`, `external id` | Manifest XML file load order issues causing External ID not found during installation/upgrade |
 | 9 | [widget-vs-field-tag-odoo17.md](views/widget-vs-field-tag-odoo17.md) | 🔴 Critical | 16, 17, 18, 19 | `views`, `kanban`, `widget`, `field` | Field widgets declaration in Kanban views using field tag with widget attribute |
+| 10 | [section_and_note_one2many_empty_row_bug.md](views/section_and_note_one2many_empty_row_bug.md) | 🔴 Critical | 16, 17, 18, 19 | `views`, `one2many`, `section_and_note_one2many`, `ui`, `tree`, `required` | section_and_note_one2many widget creates empty/deleted rows and raises RPC validation errors when dragging |
 
 
 
@@ -122,9 +123,9 @@ odoo-knowledge/
 ├── README.md              ← You are here (Index)
 ├── CONTRIBUTING.md         ← How to add/update entries
 ├── TEMPLATE.md             ← Template for new entries
-├── setup/                  ← 12 entries
-├── orm/                    ← 4 entries
-├── views/                  ← 4 entries
+├── setup/                  ← 13 entries
+├── orm/                    ← 13 entries
+├── views/                  ← 10 entries
 ├── security/               ← 2 entries
 ├── performance/            ← (empty)
 ├── deployment/             ← (empty)
@@ -134,8 +135,8 @@ odoo-knowledge/
 
 ### Stats
 
-- **Total Entries:** 31
-- **Last Updated:** 2026-05-30
+- **Total Entries:** 32
+- **Last Updated:** 2026-05-31
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
 ---
