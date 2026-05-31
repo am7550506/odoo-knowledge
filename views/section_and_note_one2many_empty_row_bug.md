@@ -60,7 +60,12 @@ For other fields (e.g., `boq_type`), remove `required=True` from Python, and use
 
 ## ⚠️ Pitfalls
 
-- Do NOT use an `is_section` boolean field for section filtering or domains. Use the built-in `display_type = fields.Selection([('line_section', 'Section'), ('line_note', 'Note')])`. When passing `default_display_type` in the `<create>` context, Odoo DOES NOT automatically update custom boolean fields like `is_section`. Rely purely on `display_type`.
+- **Do NOT use `is_section` boolean:** Do not use a boolean field for section filtering or domains. Use the built-in `display_type = fields.Selection([('line_section', 'Section'), ('line_note', 'Note')])`. When passing `default_display_type` in the `<create>` context, Odoo DOES NOT automatically update custom boolean fields like `is_section`. Rely purely on `display_type`.
+- **Smart Button Counts:** If your parent model has a compute field counting the O2M records (e.g. `len(rec.line_ids)`), it will incorrectly count the section and note rows too. You MUST filter them out:
+  ```python
+  rec.line_count = len(rec.line_ids.filtered(lambda l: not l.display_type))
+  ```
+- **Action Domains:** If you have standalone menu actions or smart buttons opening a separate list view of the lines, the sections and notes will show up as empty/broken rows. You MUST add `('display_type', '=', False)` to the `<field name="domain">` of these `ir.actions.act_window` actions.
 
 ## Verification
 
