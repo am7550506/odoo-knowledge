@@ -62,6 +62,7 @@
 | 11 | [pos-advanced-employee-ids-forced-readd.md](orm/pos-advanced-employee-ids-forced-readd.md) | 🟡 Medium | 18, 19 | `pos`, `pos_hr`, `advanced_employee_ids`, `many2many`, `write-override`, `sql` | POS administrators forcefully re-added to advanced_employee_ids on every save, bypassed via SQL on M2M join table |
 | 12 | [avoid-translation-in-field-definitions.md](orm/avoid-translation-in-field-definitions.md) | 🔴 Critical | All | `translation`, `i18n`, `fields`, `_()`, `class-body`, `bug` | Do NOT use `_()` inside field `string=`/`help=` definitions — evaluated at import time, translations silently ignored |
 | 13 | [write-override-atomicity-pattern.md](orm/write-override-atomicity-pattern.md) | 🔴 Critical | All | `write`, `override`, `atomicity`, `state-machine`, `transaction` | State changes on related records must happen AFTER `super().write()` to guarantee atomicity |
+| 14 | [state-draft-confirm-pattern.md](orm/state-draft-confirm-pattern.md) | 🟡 Medium | 16, 17, 18, 19 | `orm`, `state`, `draft`, `confirm`, `workflow`, `readonly`, `tracking`, `chatter` | Standard pattern for adding Draft/Confirm state machine with field locking and full Chatter audit trail |
 ### Views
 
 | # | File | Severity | Versions | Tags | Description |
