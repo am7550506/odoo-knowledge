@@ -32,11 +32,8 @@ Inherited view cannot have 'Groups' define on the record. Use 'groups' attribute
 > Remove the offending group assignment directly from the database for the specific view causing the issue.
 
 ```bash
-# Step 1: Identify the view ID from the database using the module and view name from the error
-psql -U gamal -d YOUR_DB_NAME -c "SELECT v.id, v.name, r.group_id FROM ir_ui_view v JOIN ir_ui_view_group_rel r ON r.view_id = v.id JOIN ir_model_data m ON m.res_id = v.id AND m.model='ir.ui.view' WHERE m.module='calendar_sms' AND m.name='view_calendar_event_tree_inherited';"
-
-# Step 2: Delete the group association from the relational table for that view ID
-psql -U gamal -d YOUR_DB_NAME -c "DELETE FROM ir_ui_view_group_rel WHERE view_id = YOUR_VIEW_ID;"
+# Delete all invalid group associations for any inherited view across the ENTIRE database
+psql -U odoo -d YOUR_DB_NAME -c "DELETE FROM ir_ui_view_group_rel WHERE view_id IN (SELECT id FROM ir_ui_view WHERE inherit_id IS NOT NULL AND mode != 'primary');"
 ```
 
 ## ⚠️ Pitfalls
