@@ -136,7 +136,7 @@ odoo-knowledge/
 ### Stats
 
 - **Total Entries:** 32
-- **Last Updated:** 2026-05-31
+- **Last Updated:** 2026-06-02
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
 ---
