@@ -76,7 +76,7 @@
 | 8 | [xml-load-order-manifest.md](views/xml-load-order-manifest.md) | 🔴 Critical | All | `manifest`, `xml`, `load order`, `parent menu`, `external id` | Manifest XML file load order issues causing External ID not found during installation/upgrade |
 | 9 | [widget-vs-field-tag-odoo17.md](views/widget-vs-field-tag-odoo17.md) | 🔴 Critical | 16, 17, 18, 19 | `views`, `kanban`, `widget`, `field` | Field widgets declaration in Kanban views using field tag with widget attribute |
 | 10 | [section_and_note_one2many_empty_row_bug.md](views/section_and_note_one2many_empty_row_bug.md) | 🔴 Critical | 16, 17, 18, 19 | `views`, `one2many`, `section_and_note_one2many`, `ui`, `tree`, `required` | section_and_note_one2many widget creates empty/deleted rows and raises RPC validation errors when dragging |
-
+| 11 | [inherited_view_groups_constraint_error.md](views/inherited_view_groups_constraint_error.md) | 🔴 Critical | 18, 19 | `views`, `groups`, `constraint`, `xml`, `inherit`, `upgrade` | Inherited view cannot have 'Groups' define on the record constraint error during module upgrade |
 
 
 ### Security
