@@ -40,6 +40,7 @@ psql -U odoo -d YOUR_DB_NAME -c "DELETE FROM ir_ui_view_group_rel WHERE view_id 
 
 - **Do NOT try to fix the core XML:** The error is NOT in the source code of the module being upgraded (like `calendar_sms`), it is in the database (`ir_ui_view_group_rel`).
 - **Never assign groups to inherited views in UI:** In Odoo 18+, assigning a group to an inherited view from the Technical menu will instantly trigger this constraint or cause future upgrades to fail.
+- **Replacing existing groups correctly:** If you need to restrict an existing standard button (e.g., `action_unlock`) that already has a group, use `<attribute name="groups">your_custom_group</attribute>` inside your `<xpath>` to securely overwrite the native group restriction without touching the view record's `groups_id`.
 
 ## Verification
 
