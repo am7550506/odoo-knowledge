@@ -112,6 +112,7 @@ _No entries yet._
 |---|------|----------|----------|------|-------------|
 | 1 | [api_logging_decorator.md](misc/api_logging_decorator.md) | 🟢 Low | 16, 17, 18, 19 | `api`, `logging`, `decorator`, `security` | Log all API requests and JSON payloads using a custom decorator |
 | 2 | [automated-xlsx-email-cron.md](misc/automated-xlsx-email-cron.md) | 🟡 Medium | 17, 18 | `xlsx`, `cron`, `email`, `report`, `pos`, `scheduled-action` | Automated XLSX report email via Cron with configurable ir.config_parameter filters |
+| 3 | [multicompany-consolidated-report-currency-follows-active-company.md](misc/multicompany-consolidated-report-currency-follows-active-company.md) | 🔴 Critical | 19 | `account_reports`, `consolidation`, `multi-company`, `multi-currency`, `currency_translation`, `cta` | Consolidated P&L/Balance Sheet totals change because the report converts everything into whichever company is the *active* one, using that company's own FX rate table |
 
 ---
 
