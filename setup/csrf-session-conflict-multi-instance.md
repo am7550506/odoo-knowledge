@@ -5,7 +5,7 @@
 | Category      | setup                                       |
 | Odoo Versions | All (17, 18, 19)                            |
 | Severity      | 🔴 Critical                                 |
-| Last Verified | 2026-05-30                                  |
+| Last Verified | 2026-09-01                                  |
 | Author        | ENG/Gamal Mansour                           |
 
 **Tags:** `csrf`, `session`, `multi-instance`, `localhost`, `cookie`, `bad-request`, `400`
@@ -95,6 +95,16 @@ Each request validates the CSRF token against **the session file on disk**. With
 ## ⚠️ Pitfalls
 
 - **`xmlrpc_port` is deprecated** — In Odoo 15+, use `http_port` instead. Both work for now but `xmlrpc_port` may cause issues.
+  - 🔴 **On Odoo 19.0 specifically, `xmlrpc_port` no longer works at all** — confirmed by
+    running a real instance with `xmlrpc_port = 8021` in the conf: no error, no warning
+    about the key itself, the server just silently binds to the **default 8069** instead.
+    `odoo/tools/config.py` on 19.0 only registers `-p/--http-port` (dest `http_port`) —
+    the `xmlrpc_port` CLI alias is gone. If a v19 instance "ignores" the port you set,
+    check the conf key name first, not the port number. Use `http_port =` on 19.0.
+  - `session_cookie_name` is **not** a real config option on 19.0 either (not referenced
+    anywhere in `odoo/`) — it loads with `unknown option ... stored as-is, without
+    parsing` and does nothing. It does not achieve session isolation; use `data_dir`
+    (Fix 1 above) for that instead.
 - **Don't use the same `longpolling_port`** — Default is 8072 for all. Assign unique ones (e.g., 8717, 8719) to avoid bus conflicts.
 - **db_filter is regex** — `.*17.*` matches any database containing "17". Adjust to match your naming convention.
 - **Restart required** — You must fully restart the Odoo process after changing the config for `data_dir` to take effect.
