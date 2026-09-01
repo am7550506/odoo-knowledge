@@ -5,10 +5,10 @@
 | Category      | orm                            |
 | Odoo Versions | All (14, 15, 16, 17, 18, 19)  |
 | Severity      | 🔴 Critical                    |
-| Last Verified | 2026-05-30                     |
+| Last Verified | 2026-09-01                     |
 | Author        | ENG/Gamal Mansour              |
 
-**Tags:** `translation`, `i18n`, `fields`, `_()`, `class-body`, `bug`
+**Tags:** `translation`, `i18n`, `fields`, `_()`, `class-body`, `bug`, `_sql_constraints`, `models.Constraint`
 
 ---
 
@@ -62,6 +62,30 @@ def action_confirm(self):
 - It also affects `_sql_constraints` error messages and `Selection` labels if wrapped.
 - Affects: `string=`, `help=`, `selection` list items in field defs, and `_sql_constraints`.
 - **Do NOT** wrap `compute=`, `inverse=`, `search=` — those are method names, not strings.
+- 🔴 **Odoo 19: `_sql_constraints` (the list-of-tuples form shown above) is no longer
+  supported.** It loads without a hard error but logs
+  `WARNING ... Model attribute '_sql_constraints' is no longer supported, please define
+  model.Constraint on the model.` and **the constraint is never created in the database** —
+  it silently does nothing, so duplicate/invalid rows go through uncaught. Confirmed by
+  installing a module with the old syntax on 19.0: no unique index existed on the table
+  afterwards. Replace with a `models.Constraint` class attribute instead:
+  ```python
+  # ❌ Dead on 19.0 — loads, warns, enforces nothing
+  _sql_constraints = [
+      ('unique_name', 'UNIQUE(name)', 'Name must be unique!'),
+  ]
+
+  # ✅ Odoo 19 — same rule, still just a plain string (no _())
+  _unique_name = models.Constraint(
+      'UNIQUE(name)',
+      'Name must be unique!',
+  )
+  ```
+  The translation rule in this entry (never wrap the message in `_()`) still applies
+  identically to the new form. Attribute name is free-form (convention: leading
+  underscore, e.g. `_unique_name`) — it is not looked up by that name, only its value
+  matters. Real examples in core 19.0: `addons/project/models/project_tags.py`
+  (`_name_uniq`), `addons/project/models/project_project.py` (`_project_date_greater`).
 
 ## Verification
 
