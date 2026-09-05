@@ -63,6 +63,9 @@
 | 12 | [avoid-translation-in-field-definitions.md](orm/avoid-translation-in-field-definitions.md) | 🔴 Critical | All | `translation`, `i18n`, `fields`, `_()`, `class-body`, `bug`, `_sql_constraints`, `models.Constraint` | Do NOT use `_()` inside field `string=`/`help=` definitions; on Odoo 19 also note `_sql_constraints` is dead — use `models.Constraint` |
 | 13 | [write-override-atomicity-pattern.md](orm/write-override-atomicity-pattern.md) | 🔴 Critical | All | `write`, `override`, `atomicity`, `state-machine`, `transaction` | State changes on related records must happen AFTER `super().write()` to guarantee atomicity |
 | 14 | [state-draft-confirm-pattern.md](orm/state-draft-confirm-pattern.md) | 🟡 Medium | 16, 17, 18, 19 | `orm`, `state`, `draft`, `confirm`, `workflow`, `readonly`, `tracking`, `chatter` | Standard pattern for adding Draft/Confirm state machine with field locking and full Chatter audit trail |
+| 15 | [sale-order-confirmation-approval-gate.md](orm/sale-order-confirmation-approval-gate.md) | 🟢 Low | 17, 18, 19 | `sale`, `sale.order`, `approval`, `action_confirm`, `workflow`, `hook`, `groups` | Gate Sale Order confirmation on custom approvals via the `_confirmation_error_message()` hook instead of overriding `action_confirm()` |
+| 16 | [stale-group-membership-cache-odoo-bin-shell.md](orm/stale-group-membership-cache-odoo-bin-shell.md) | 🟡 Medium | 16, 17, 18, 19 | `orm`, `ormcache`, `res.groups`, `res.users`, `shell`, `dev-server`, `caching`, `multi-process` | Group/permission changes made via a separate `odoo-bin shell` don't appear in an already-running dev server until it's restarted (per-process `ormcache`) |
+
 ### Views
 
 | # | File | Severity | Versions | Tags | Description |
@@ -139,8 +142,8 @@ odoo-knowledge/
 
 ### Stats
 
-- **Total Entries:** 32
-- **Last Updated:** 2026-06-02
+- **Total Entries:** 34
+- **Last Updated:** 2026-09-05
 - **Contributors:** ENG/Mohamed Saber, ENG/Mohamed Hamdy, ENG/Gamal Mansour
 
 ---
