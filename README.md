@@ -65,6 +65,7 @@
 | 14 | [state-draft-confirm-pattern.md](orm/state-draft-confirm-pattern.md) | 🟡 Medium | 16, 17, 18, 19 | `orm`, `state`, `draft`, `confirm`, `workflow`, `readonly`, `tracking`, `chatter` | Standard pattern for adding Draft/Confirm state machine with field locking and full Chatter audit trail |
 | 15 | [sale-order-confirmation-approval-gate.md](orm/sale-order-confirmation-approval-gate.md) | 🟢 Low | 17, 18, 19 | `sale`, `sale.order`, `approval`, `action_confirm`, `workflow`, `hook`, `groups` | Gate Sale Order confirmation on custom approvals via the `_confirmation_error_message()` hook instead of overriding `action_confirm()` |
 | 16 | [stale-group-membership-cache-odoo-bin-shell.md](orm/stale-group-membership-cache-odoo-bin-shell.md) | 🟡 Medium | 16, 17, 18, 19 | `orm`, `ormcache`, `res.groups`, `res.users`, `shell`, `dev-server`, `caching`, `multi-process` | Group/permission changes made via a separate `odoo-bin shell` don't appear in an already-running dev server until it's restarted (per-process `ormcache`) |
+| 17 | [consolidate-same-code-accounts-across-companies.md](orm/consolidate-same-code-accounts-across-companies.md) | 🟡 Medium | 19 | `consolidation`, `multi-company`, `multi-currency`, `account.account`, `account.group`, `raw-sql`, `wizard` | Wizard merging accounts that share a code across companies into one consolidated, currency-converted line, fixing the rate source per company instead of the active company |
 
 ### Views
 
