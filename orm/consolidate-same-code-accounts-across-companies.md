@@ -128,6 +128,38 @@ account, no further drill needed since code and name are 1:1 already). Kept
 `code`/`name` as separate stored fields for the List view's own columns —
 only the *pivot's row axis* needed simplifying.
 
+## Follow-up: same engine, three statement types (Trial Balance / P&L / Balance Sheet)
+
+Client wanted consolidated Balance Sheet, P&L and Trial Balance reports, "same
+company picker, I choose". Decision (asked explicitly, not assumed): reuse the
+exact same code-merge + per-date-rate + month-bucket engine for all three,
+**not** the official statement layout (no sections, no subtotals, no
+Assets = Liabilities + Equity structure) - and keep it **one wizard** with a
+`report_type` Selection field, not three separate wizards/menus.
+
+Implementation: a `report_type` field (`trial_balance` / `profit_loss` /
+`balance_sheet`) plus a small dict mapping each to the `account.account.
+account_type` values that belong in it (`asset_*`/`liability_*`/`equity*` for
+Balance Sheet, `income*`/`expense*` for P&L, no filter at all for Trial
+Balance). The filter is applied as one extra `AND account_account.account_type
+= ANY(%(account_types)s)` clause in the existing raw SQL (built conditionally
+with `SQL(...) if account_types else SQL()`, following the same nested-SQL-
+fragment pattern used throughout `account_reports/models/account_report.py`).
+
+**Explicitly flagged as a limitation, not silently glossed over:** since the
+whole report buckets everything by calendar month (see the per-transaction-
+date entry above), a Balance Sheet account here shows *that month's movement*,
+not the account's *cumulative running balance* - which is what a real Balance
+Sheet needs (it's a point-in-time snapshot, not a period movement, unlike P&L
+accounts). Chosen deliberately for speed on this client's explicit request;
+written down in the module README so it isn't rediscovered as a "bug" later.
+
+**Verified live** via `odoo-bin shell` against the real `ayadi_test` data:
+Trial Balance returned 111 lines for January 2026, Profit and Loss 54, Balance
+Sheet 57 - a clean 54 + 57 = 111 partition with no overlap, and the codes
+landed where expected (P&L: `40xxx` income codes; Balance Sheet: `101xx` cash
+codes).
+
 ## ⚠️ Pitfalls
 
 - Don't assume two accounts with the same name/code across companies are the same
