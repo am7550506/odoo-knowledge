@@ -44,6 +44,7 @@
 | 11 | [postgresql-port-conflict-and-db-version-mismatch.md](setup/postgresql-port-conflict-and-db-version-mismatch.md) | 🔴 Critical | 17, 18, 19 | `postgresql`, `port-conflict`, `startup`, `database`, `version-mismatch`, `short_time_format`, `brew`, `macos` | PostgreSQL port 5432 conflict between multiple installed versions on macOS, and DB version mismatch causing missing column errors on startup |
 | 12 | [csrf-session-conflict-multi-instance.md](setup/csrf-session-conflict-multi-instance.md) | 🔴 Critical | All | `csrf`, `session`, `multi-instance`, `localhost`, `cookie`, `bad-request`, `400` | CSRF token / session conflict when running multiple Odoo instances simultaneously on the same machine |
 | 13 | [data-addons-write-permissions.md](setup/data-addons-write-permissions.md) | 🔴 Critical | All | `setup`, `permissions`, `data_dir`, `assets`, `AssetsLoadingError` | Data Addons directory write permission issues causing AssetsLoadingError |
+| 14 | [server-crash-wrong-python-interpreter-missing-xmlsec.md](setup/server-crash-wrong-python-interpreter-missing-xmlsec.md) | 🔴 Critical | 19 | `venv`, `python`, `xmlsec`, `l10n_nl_reports`, `crash`, `registry` | Server port binds but registry loop-fails when launched with the wrong Python interpreter (missing `xmlsec` for a Dutch-company localization) |
 
 ### ORM
 

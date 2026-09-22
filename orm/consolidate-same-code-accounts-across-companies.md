@@ -5,7 +5,7 @@
 | Category      | orm (custom reporting wizard)              |
 | Odoo Versions | 19 (relies on `code_store` being a jsonb keyed by company_id — verify on 17/18 where `code` may be a plain Char) |
 | Severity      | 🟡 Medium |
-| Last Verified | 2026-08-30 |
+| Last Verified | 2026-09-22 |
 | Author        | ENG/Gamal Mansour |
 
 **Tags:** `consolidation`, `multi-company`, `multi-currency`, `account.account`, `account.group`, `raw-sql`, `wizard`
@@ -75,6 +75,34 @@ Built a standalone module (`ayadi_consolidation_report`) with a `TransientModel`
 5. Keep a human-readable "per-company breakdown" string (native amount + converted
    amount per company) on each result line — critical for the accountant to audit the
    total back to source without re-deriving the FX math by hand.
+
+## Follow-up: rate per transaction date + month-over-month comparison
+
+Client's next ask: don't use one flat rate for the whole period - convert each
+transaction at the rate valid **on its own date** - and let them compare the
+consolidated total **month by month**. Both fit the same design cleanly:
+
+- Group the raw SQL by the **exact `account_move_line.date`** (not just by
+  account/company) instead of collapsing straight to one SUM per account. Then
+  in Python, cache `_get_conversion_rate(company.currency_id, target, company,
+  that_exact_date)` per `(company_id, date)` pair (a plain dict cache — avoids
+  re-querying the rate for every line that shares a date) and convert each
+  day's bucket individually before summing into the code's total.
+- Bucket the converted amounts by `date.replace(day=1)` ("period") and create
+  **one `consolidation.report.line` per (code, period)** instead of one per
+  code overall. A `period` Date field on the line model plus a **Pivot view**
+  (`<field name="period" type="col" interval="month"/>`, rows = group/code/
+  name, measure = balance) gives the month-over-month comparison for free —
+  no extra wizard toggle needed. The List view (grouped by group/code) still
+  gives the plain total when the month breakdown isn't wanted.
+- **Verified live** against the project's real `ayadi_test` database via
+  `odoo-bin shell` (not just synthetic unit tests): the same FZCO monthly AED
+  depreciation entry (constant 1019.38 AED every month) converted to a
+  **different** EGP amount each month (13000.76 → 13280.58 → 14861.13 → ...),
+  proving the per-date rate lookup is real and not silently falling back to
+  one rate. Re-running with the active company flipped from LLC to FZCO
+  produced byte-for-byte identical monthly totals — the original fix still
+  holds after this change.
 
 ## ⚠️ Pitfalls
 
