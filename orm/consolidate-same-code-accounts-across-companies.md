@@ -104,6 +104,30 @@ consolidated total **month by month**. Both fit the same design cleanly:
   produced byte-for-byte identical monthly totals — the original fix still
   holds after this change.
 
+## Follow-up: pivot row labels rendering blank / duplicate-looking rows
+
+Client reported the Pivot view's row header column showing **blank text** and
+what looked like duplicate rows with identical figures, right after the
+month-comparison feature above shipped. The underlying `consolidation.report.
+line` data was verified correct via direct SQL (no duplicate `(code, period)`
+rows for the wizard run in question) — this was a **view-level** issue, not a
+data bug.
+
+Root cause: the pivot declared **3 separate row levels**
+(`group_id` -> `code` -> `name`), all as plain fields, with hundreds of
+distinct `code`/`name` combinations. Odoo's pivot widget is built for a
+moderate number of distinct values per level with a clean drill-down; feeding
+it two more high-cardinality Char levels on top of a Many2one level is not
+standard usage and produced an unreadable/blank-looking result.
+
+**Fix:** collapse the two leaf levels into **one combined Char field**
+(`account_label`, e.g. `"70011 Computers Dep."`, built once in Python when the
+line is created: `f"{code} {name}"`) and use only **two** pivot row levels:
+`group_id` (Many2one, moderate cardinality) then `account_label` (one leaf per
+account, no further drill needed since code and name are 1:1 already). Kept
+`code`/`name` as separate stored fields for the List view's own columns —
+only the *pivot's row axis* needed simplifying.
+
 ## ⚠️ Pitfalls
 
 - Don't assume two accounts with the same name/code across companies are the same
