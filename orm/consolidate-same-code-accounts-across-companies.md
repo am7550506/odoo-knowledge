@@ -5,7 +5,7 @@
 | Category      | orm (custom reporting wizard)              |
 | Odoo Versions | 19 (relies on `code_store` being a jsonb keyed by company_id — verify on 17/18 where `code` may be a plain Char) |
 | Severity      | 🟡 Medium |
-| Last Verified | 2026-09-22 |
+| Last Verified | 2026-09-29 |
 | Author        | ENG/Gamal Mansour |
 
 **Tags:** `consolidation`, `multi-company`, `multi-currency`, `account.account`, `account.group`, `raw-sql`, `wizard`
@@ -160,6 +160,47 @@ Sheet 57 - a clean 54 + 57 = 111 partition with no overlap, and the codes
 landed where expected (P&L: `40xxx` income codes; Balance Sheet: `101xx` cash
 codes).
 
+## Follow-up: month-end rate (not per-transaction) + statement-style sections
+
+Client's next ask reversed part of the earlier per-transaction-date decision:
+convert each month using the rate as of that month's **closing date**, not
+each individual transaction's own date - and order/section the result like
+the official Balance Sheet / P&L (Assets, Liabilities, Equity, Income,
+Expenses, each in the same account-type order Odoo's own statements use).
+
+- SQL now groups directly by `date_trunc('month', account_move_line.date)`
+  instead of the exact date - simpler and fewer rows, since the per-day
+  granularity was only ever needed to support per-transaction rates.
+- Rate lookup per (company, month) is `_get_conversion_rate(company_currency,
+  target, company, month_end_date)` where `month_end_date =
+  min(last_calendar_day_of_month, self.date_to)` - the cap matters for a
+  partial trailing month (e.g. report ending mid-month): using the real
+  calendar month-end there would look up a rate that may not exist yet (a
+  "future" date relative to the report), or silently pick up a rate entered
+  later for a date the report has no business reaching.
+- Added an `_ACCOUNT_TYPE_ORDER` dict: `account_type -> (section, section_seq,
+  type_seq)`, read directly from the actual official report data files
+  (`enterprise/account_reports/data/balance_sheet.xml`,
+  `profit_and_loss.xml`) rather than guessed - e.g. Bank and Cash before
+  Receivables before Current Assets, Cost of Revenue before Operating
+  Expenses before Other Expenses.
+- **Important field-type lesson:** the `section` field must be a
+  **Selection**, not a Char, even though both were populated from the same
+  Python dict. Odoo's Pivot/List views group a Char field's values
+  **alphabetically**; a Selection field's groupby instead follows the
+  **order the options are declared in the field definition**. Using Char
+  first produced a technically-correct-but-wrong-looking report (Assets,
+  Equity, Expenses, Income, Liabilities on screen); switching to Selection
+  fixed the on-screen order to match the official statements without any
+  other change.
+- **Verified live** via `odoo-bin shell` on real `ayadi_test` data: a Balance
+  Sheet run returned only `Assets`/`Liabilities` sections (no `Equity`
+  activity that quarter) correctly labelled and ordered; a P&L run separately
+  returned `Income` lines. Also reran the same FZCO AED account across two
+  months and confirmed the converted amount changed between months (proving
+  month-end rate lookup is live), while switching the active company between
+  the two runs still produced identical totals (the original fix untouched).
+
 ## ⚠️ Pitfalls
 
 - Don't assume two accounts with the same name/code across companies are the same
@@ -171,10 +212,18 @@ codes).
   `ir.rule` on `account.move.line` in core (`account_move_line_rule_group_readonly`,
   domain `(1,=,1)`) — gate the new wizard/lines models on that same group and the
   cross-company read works without `sudo()` or `allowed_company_ids` context tricks.
-- This method uses one spot rate per company (as of `date_to`), not the
-  historical/average/current CTA method core P&L uses for equity vs. income/expense
-  accounts. Fine for a quick consolidated total; say so explicitly if handed to
-  statutory reporting.
+- This method uses one spot rate per company per MONTH (as of that month's
+  closing date, or `date_to` for a partial last month - see the follow-up
+  below), not the historical/average/current CTA method core P&L uses for
+  equity vs. income/expense accounts. Fine for a quick consolidated total;
+  say so explicitly if handed to statutory reporting.
+- **Pivot/List groupby ordering depends on the field type**: a `Char` groups
+  alphabetically; a `Selection` groups by its declared option order. If a
+  report needs its grouped section headers in a specific business order
+  (statement sections, workflow stages, priority levels, ...), that field
+  must be a `Selection` (or handled via explicit `orderby`), never a plain
+  `Char` with a "sort key" sibling field — the sibling field does not
+  influence how the *groupby headers themselves* are ordered on screen.
 
 ## Verification
 
