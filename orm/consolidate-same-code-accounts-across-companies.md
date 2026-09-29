@@ -201,6 +201,57 @@ Expenses, each in the same account-type order Odoo's own statements use).
   month-end rate lookup is live), while switching the active company between
   the two runs still produced identical totals (the original fix untouched).
 
+## Follow-up: computed subtotals (Gross Profit, Total Assets, ...) + sign convention
+
+Client saw a screenshot of the REAL Odoo Profit and Loss (Revenue → Less
+Costs of Revenue → **Gross Profit** → Less Operating Expenses → **Operating
+Income** → ...) and asked for the consolidated report to match it, including
+the computed subtotal rows - a real scope increase from the earlier "same
+simple logic, just sectioned" decision.
+
+**Design:** replaced the single broad `_ACCOUNT_TYPE_ORDER` with a
+`_SECTION_MAP` keyed by `report_type`, mapping each `account_type` straight
+to the exact row the official statement puts it in - read directly from
+`enterprise/account_reports/data/balance_sheet.xml` /
+`profit_and_loss.xml`'s `account.report.line` records, not guessed. Then a
+declarative list of computed rows (`_PROFIT_LOSS_TOTALS`,
+`_BALANCE_SHEET_TOTALS`): `(result_section, sequence, label, [(sign, source_section), ...])`,
+applied **per month** in order - later formulas may reference an EARLIER
+computed section in the same list (e.g. `operating_income` is built from the
+just-computed `gross_profit`), which works because the totals dict is filled
+in incrementally, one formula at a time, across all periods, before moving to
+the next formula.
+
+**Bug found via the exact same source files, not by inspection of my own
+numbers:** two things were wrong before comparing against the XML source:
+1. `expense_depreciation` had been put in "Less Operating Expenses" - the
+   real report groups it with `expense_other` under "Less Other Expenses"
+   (see the `formula eval="[('account_id.account_type', 'in', ('expense_other', 'expense_depreciation'))]"`
+   on the "Less Other Expenses" line). An assumption made without checking
+   the source, silently wrong until compared line-by-line against the XML.
+2. **Sign convention.** Every `account.report.expression` for an
+   income/liability/equity/off_balance line in those two XML files uses
+   `subformula: "-sum"`, never plain `"sum"` - asset and expense lines use
+   plain `"sum"`. Odoo's ledger balance (`debit - credit`) is naturally
+   *negative* for credit-natured types (income, liability, equity) when they
+   increase; the official statements negate exactly those types so Revenue/
+   Liabilities/Equity read as ordinary positive numbers. Before this fix,
+   Revenue and Gross Profit were flipped-sign relative to the real report,
+   which is a **correctness bug**, not just a cosmetic difference - a
+   negative "Gross Profit" that was actually a real positive gross profit
+   (and vice versa) is exactly the kind of thing that erodes trust in every
+   other number the report shows.
+   Applied as a small `_DISPLAY_SIGN = {account_type: -1, ...}` map, used
+   ONLY for `profit_loss`/`balance_sheet` (never `trial_balance`, which is
+   conventionally read as the raw signed ledger balance).
+
+**Verified live** via `odoo-bin shell` against real `ayadi_test` data by
+hand-summing the printed leaf rows and checking they equal the printed
+computed row: Revenue (818,501.88) − Cost of Revenue (1,273,664.43) =
+−455,162.55, which matched the Gross Profit row exactly; Total Liabilities
+flipped from a wrong −6,516,908.16 to the correct +6,516,908.16 after the
+sign fix, while Total Assets (asset type, no flip needed) stayed unchanged.
+
 ## ⚠️ Pitfalls
 
 - Don't assume two accounts with the same name/code across companies are the same
@@ -224,6 +275,15 @@ Expenses, each in the same account-type order Odoo's own statements use).
   must be a `Selection` (or handled via explicit `orderby`), never a plain
   `Char` with a "sort key" sibling field — the sibling field does not
   influence how the *groupby headers themselves* are ordered on screen.
+- **Never assume a display sign convention — read the actual report's XML.**
+  Odoo's raw ledger `balance` (debit − credit) is negative for credit-natured
+  types (income, liability, equity) when they increase. Any custom report
+  that shows these account types needs to know whether the number in front
+  of it is the raw ledger balance or the presentation-negated one; guessing
+  produced a genuinely wrong Gross Profit sign here. Check
+  `account.report.expression.subformula` (`"sum"` vs `"-sum"`) on the
+  official report's data file for the exact account types involved before
+  writing any formula that adds/subtracts across account types.
 
 ## Verification
 
