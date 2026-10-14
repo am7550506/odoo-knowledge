@@ -5,7 +5,7 @@
 | Category      | orm (custom reporting wizard)              |
 | Odoo Versions | 19 (relies on `code_store` being a jsonb keyed by company_id — verify on 17/18 where `code` may be a plain Char) |
 | Severity      | 🟡 Medium |
-| Last Verified | 2026-09-29 |
+| Last Verified | 2026-10-14 |
 | Author        | ENG/Gamal Mansour |
 
 **Tags:** `consolidation`, `multi-company`, `multi-currency`, `account.account`, `account.group`, `raw-sql`, `wizard`
@@ -251,6 +251,46 @@ computed row: Revenue (818,501.88) − Cost of Revenue (1,273,664.43) =
 −455,162.55, which matched the Gross Profit row exactly; Total Liabilities
 flipped from a wrong −6,516,908.16 to the correct +6,516,908.16 after the
 sign fix, while Total Assets (asset type, no flip needed) stayed unchanged.
+
+## Follow-up: Profit and Loss / Balance Sheet driven by a client layout workbook (v19.0.2.0.0)
+
+Client supplied "Aydi_FS layout.xlsx" (Line > Group > Account with per-company
+code ticks, a Spain-code column, "Merged?" / "Elimination" notes and total rows)
+and asked for the report to look exactly like it. This **replaced** the
+hard-coded `_SECTION_MAP` / `_PROFIT_LOSS_TOTALS` approach above for
+Profit and Loss / Balance Sheet (Trial Balance keeps the old engine).
+
+- **Layout as data, not code.** New persistent model `consolidation.layout.line`
+  (kind: header/line/group/subgroup/account/total, `parent_id`, `code`,
+  `spain_code`, `display_sign`, `profit_effect`, `block`, `total_kind`,
+  `special`), seeded from the workbook by a one-off script into an
+  `<odoo noupdate="1">` XML, editable under Accounting > Configuration. Row
+  classification came from the workbook's cell styles (fill colour / bold /
+  indent), not from guessing.
+- **Many2one for ordering.** Report rows point at the layout nodes
+  (`layout_line_id`, `layout_group_id`, `layout_subgroup_id`); Odoo groups a
+  Many2one by the comodel's `_order`, so Pivot/List headers come out in layout
+  order with no Selection and no sort-key tricks. Missing group levels fall
+  back to the parent node to avoid "None" buckets.
+- **Spain is linked, not merged**: Spanish companies (`company.country_id.code
+  == 'ES'`) are matched on `spain_code`; everyone else on `code`.
+- **Never drop unmapped balances.** Accounts whose code is not in the layout go
+  to seeded "Unmapped ... (not in layout)" holder lines (by sign/block), so
+  totals and the balance-sheet equation survive layout/ledger code drift. On
+  the real DB: 6 unmapped P&L accounts and 47 unmapped BS accounts (renumbered
+  codes, B.V.'s own 11xxxx/12xxxx codes, Spain short codes) - the layout is the
+  *target* chart, the ledger is not fully aligned yet.
+- **Balance Sheet must be cumulative to balance.** Fetch all history up to
+  `date_to` grouped by month (no lower bound), accumulate per (company,
+  account) in Python, convert the cumulative balance at the month-end rate.
+  "Result of the period" = cumulative result of *all* income/expense accounts
+  over the same span x -1 (closing entries are inside it automatically).
+  Because every company's trial balance sums to zero and one rate is used per
+  (company, month), assets = liabilities + equity holds exactly: verified on
+  the real DB, diff 0.00 every month, in EGP and in USD.
+- Totals are data-driven: P&L `running` (sum of `profit_effect x value` of every
+  leaf row above), BS `block_*` and `equity_liabilities`.
+- IC lines are flagged (`elimination` note), not eliminated - client choice.
 
 ## ⚠️ Pitfalls
 
