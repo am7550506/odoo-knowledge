@@ -333,6 +333,21 @@ the user to archive the old one instead of overwriting config; (b) the rate
 tables only hold month-end rates, so "historical" = the posting month's closing
 rate, not the transaction-date rate.
 
+### Self-audit before shipping the Balance Sheet again
+
+A read-only audit of the real data (before telling the client "done") found two
+things the numbers alone did not show, so the report now says them out loud
+(`ir.actions.client` `display_notification` with the report action in `next`):
+
+- **Stale rates are silent in Odoo.** FZCO had no USD rate for May/June, so
+  `_get_conversion_rate` quietly used April's. Check the rate table per
+  (company, month); a conversion that "works" is not a conversion that is right.
+- **Elimination without a complete mapping inflates equity.** With only one
+  side of an intercompany pair in the layout, the "difference" line pushed
+  equity up by ~2.4M USD. IC balances mostly carry NO partner in this ledger
+  (only B.V.'s do), so partner-based elimination is not an option; the codes
+  have to be mapped. Warn when the difference exceeds 0.5% of assets.
+
 ## ⚠️ Pitfalls
 
 - Don't assume two accounts with the same name/code across companies are the same
