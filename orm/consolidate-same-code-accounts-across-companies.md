@@ -5,7 +5,7 @@
 | Category      | orm (custom reporting wizard)              |
 | Odoo Versions | 19 (relies on `code_store` being a jsonb keyed by company_id — verify on 17/18 where `code` may be a plain Char) |
 | Severity      | 🟡 Medium |
-| Last Verified | 2026-10-14 |
+| Last Verified | 2026-10-19 |
 | Author        | ENG/Gamal Mansour |
 
 **Tags:** `consolidation`, `multi-company`, `multi-currency`, `account.account`, `account.group`, `raw-sql`, `wizard`
@@ -291,6 +291,47 @@ Profit and Loss / Balance Sheet (Trial Balance keeps the old engine).
 - Totals are data-driven: P&L `running` (sum of `profit_effect x value` of every
   leaf row above), BS `block_*` and `equity_liabilities`.
 - IC lines are flagged (`elimination` note), not eliminated - client choice.
+
+## Follow-up: accountant's review of the consolidated Balance Sheet (v19.0.3.0.0)
+
+The client's accountant found the v2 Balance Sheet "bigger than the truth" and
+named three causes; all three were real:
+
+1. **No intercompany elimination.** Due from/to related parties and investments
+   in subsidiaries sat in both companies' balances, inflating assets and
+   liabilities. Fix: layout lines whose `elimination` note starts with
+   "Eliminate" get an "Intercompany elimination" row (= minus the line's total,
+   same block) when the wizard option is on; the amount that does not cancel
+   (`eliminated liabilities + equity - eliminated assets`) goes to an explicit
+   "Intercompany Elimination Difference" equity line. Only the flagged lines
+   are eliminated. On the real DB the difference is large because B.V.'s and
+   FZCO's IC accounts (120002/26013 ...) are not in the layout yet - and the
+   matching pair (B.V. due-from-FZCO vs FZCO due-to-Holdings) is *exactly* equal,
+   so mapping them will cancel it.
+2. **One "Result of the period" mixed current and previous years.** Odoo's live
+   Balance Sheet has two lines; so does this now. Split each company's P&L
+   months at `company.compute_fiscalyear_dates(month)['date_from']`: current
+   year = months from fiscal-year start, previous years = everything earlier.
+   Verified: Current Year in January equals the P&L report's NET RESULT for
+   January to the unit; previous + current matches the accountant's combined
+   figure within ~0.1%.
+3. **Whole balance sheet translated at the closing rate => untouched retained
+   losses moved every month, and the translation difference was invisible.**
+   Proper CTA method: assets/liabilities at the month's closing rate, **equity
+   at the historical rate** (each posting converted at its own month's rate and
+   accumulated, so an unchanged balance stays unchanged in the reporting
+   currency), P&L at each month's rate; the remainder, computed per company as
+   `assets - liabilities - equity - earnings` (all display-signed, translated),
+   is its own "Currency Translation Adjustment" equity line. Verified: LLC's
+   retained earnings is the same USD value in every month; the sheet still
+   balances to 0.00 with eliminations on and off.
+
+Gotchas hit on the way: (a) an XML record that already exists with
+`noupdate="1"` is NOT updated by a second data file even with `noupdate="0"`
+(a rename was silently skipped) - ship a new record with a new xmlid and tell
+the user to archive the old one instead of overwriting config; (b) the rate
+tables only hold month-end rates, so "historical" = the posting month's closing
+rate, not the transaction-date rate.
 
 ## ⚠️ Pitfalls
 
